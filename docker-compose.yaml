@@ -1,0 +1,9 @@
+version: "3.8"
+services:
+  mysql:
+    image: mariadb:10.3
+    ports:
+      - 3306:3306
+    environment:
+      MARIADB_ROOT_PASSWORD: "mamali75"
+      MYSQL_DATABASE: "cdr"
