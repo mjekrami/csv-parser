@@ -1,8 +1,9 @@
 import logging
 
-def setup_logger(filename,level) -> logging.RootLogger:
+
+def setup_logger(filename, level) -> logging.RootLogger:
     """instance of logger module, will be used for logging operations"""
-    
+
     # logger config
     logger = logging.getLogger(__name__)
     logger.setLevel(level)
