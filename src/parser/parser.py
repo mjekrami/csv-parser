@@ -24,10 +24,6 @@ class CSVProcessor:
                 raise (e)
 
 
-CDR_PATH = "./csv/*"
-CSV_FILES = glob.glob(CDR_PATH)
-
-
 class Scanner:
     def __init__(self, status_file: StatusFile, scan_path) -> None:
         self.scan_path = glob.glob(scan_path)
