@@ -1,7 +1,7 @@
 import polars as pl
 from logger.log import setup_logger
 import logging
-from csvobj.statusfile import StatusFile
+from csvobj.statefile import StateFile
 from csvobj.csv import CSVFile
 import glob
 
@@ -9,7 +9,7 @@ logger = setup_logger("processor.log", logging.DEBUG)
 
 
 class CSVProcessor:
-    def __init__(self, sf: StatusFile) -> None:
+    def __init__(self, sf: StateFile) -> None:
         self.sf = sf
 
     def parse(self, csv: CSVFile):
@@ -25,9 +25,9 @@ class CSVProcessor:
 
 
 class Scanner:
-    def __init__(self, status_file: StatusFile, scan_path) -> None:
+    def __init__(self, State_file: StateFile, scan_path) -> None:
         self.scan_path = glob.glob(scan_path)
-        self.sf = status_file
+        self.sf = State_file
 
     def scan(self):
         res = []

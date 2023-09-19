@@ -1,7 +1,7 @@
 import argparse
 
 from csvobj.csv import CSVFile
-from csvobj.statusfile import StatusFile
+from csvobj.statefile import StateFile
 
 from parser.parser import CSVProcessor, Scanner
 
@@ -19,13 +19,13 @@ if __name__ == "__main__":
                         help="Path to the logging file",
                         default="/dev/stdout")
 
-    parser.add_argument("--status-path", dest="status_path",
-                        required=True, help="Path to the status file")
+    parser.add_argument("--state-path", dest="state_path",
+                        required=True, help="Path to the State file")
     parser.add_argument("--scan-path", dest="scan_path",
                         required=True, help="Path to scan CSV files")
     args = parser.parse_args()
     logger = setup_logger(args.log_path, INFO)
-    sf = StatusFile(args.status_path)
+    sf = StateFile(args.state_path)
     parser = CSVProcessor(sf)
     scanner = Scanner(sf, args.scan_path)
     files: [CSVFile | None] = scanner.scan()
