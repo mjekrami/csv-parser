@@ -1,6 +1,6 @@
 import json
-from .csv import CSVFile
-
+from .file import File
+from pathlib import Path
 
 class StateFile:
     def __init__(self, path) -> None:
@@ -18,11 +18,10 @@ class StateFile:
         with open(self.path, "w") as sf:
             json.dump(self.state_data, sf)
 
-    def check_csv_is_parsed(self, csv):
-        csv_path = csv.path
-        return self.state_data.get(csv_path, False)
+    def check_file_is_parsed(self, file):
+        return self.state_data.get(file.path, False)
 
-    def set_csv_read(self, csv: CSVFile, is_read: bool):
-        csv_path = csv.path
-        self.state_data[csv_path] = is_read
+    def set_file_read(self, file: File, is_read: bool):
+        file_path = file.path
+        self.state_data[file_path] = is_read
         self.save_state()

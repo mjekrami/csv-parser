@@ -1,9 +1,9 @@
 import argparse
 
-from csvobj.csv import CSVFile
+from csvobj.file import File
 from csvobj.statefile import StateFile
 
-from parser.parser import CSVProcessor, Scanner
+from parser.parser import Parser, Scanner
 
 from logger.log import setup_logger
 from logging import INFO
@@ -26,9 +26,9 @@ if __name__ == "__main__":
     args = parser.parse_args()
     logger = setup_logger(args.log_path, INFO)
     sf = StateFile(args.state_path)
-    parser = CSVProcessor(sf)
+    parser = Parser(sf)
     scanner = Scanner(sf, args.scan_path)
-    files: [CSVFile | None] = scanner.scan()
+    files: [File | None] = scanner.scan()
     for file in files:
         reader = parser.parse(file)
         if reader is not None:
@@ -38,12 +38,12 @@ if __name__ == "__main__":
                 while batches:
                     for batch in batches:
                         batch.write_database(tablename, engine="sqlalchemy",
-                                             connection_uri=CONNECTION_STRING,
+                                             connection=CONNECTION_STRING,
                                              if_exists="append")
                     batches = reader.next_batches(100)
 
                 logger.info(
                     f"Successfully wriiten {file.path} to {tablename}")
             except Exception as e:
-                sf.set_csv_read(file, False)
-                logger.error(e)
+                sf.set_file_read(file, False)
+                raise(e)
