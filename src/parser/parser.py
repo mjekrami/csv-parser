@@ -1,8 +1,9 @@
 from abc import abstractmethod
 
+from watchdog.observers import Observer
+
 from logger.log import setup_logger
 from files.statefile import StateFile
-
 from files.csv import CSVFile
 from files.file import File
 from files.xlsx import XLSXFile
@@ -11,12 +12,13 @@ import polars as pl
 import logging
 import glob
 import os
+import csv
 
 logger = setup_logger("processor.log", logging.DEBUG)
 
 
 class AbastractParser:
-    __DATE_COLUMNS = ["Date","Day"]
+    _DATE_COLUMNS = ["Date","Day"]
 
     def __init__(self, sf: StateFile) -> None:
         self.sf = sf
@@ -25,11 +27,13 @@ class AbastractParser:
     def parse(self, file: File):
         pass
 
-    def _parse_dates(self, df: pl.DataFrame):
-        if self.__DATE_COLUMNS in df.columns:
-            date_col = df.columns[0]
-            df = df.with_columns(pl.col(date_col).str.strptime(pl.Date, format="%Y.%m.%d"))
-            return df
+    def parse_dates(self, df: pl.DataFrame):
+        for date in self._DATE_COLUMNS:
+            if date in df.columns:
+                date_col = df.columns[0]
+                df = df.with_columns(pl.col(date_col).str.strptime(pl.Date, format="%Y.%m.%d"))
+                return df
+        raise Exception("Could not parse dates")
 
 
 class CSVParser(AbastractParser):
@@ -72,21 +76,33 @@ class Parser(AbastractParser):
 
 
 class Scanner:
-    def __init__(self, State_file: StateFile, scan_path) -> None:
+
+    def __init__(self, scan_path) -> None:
         self.scan_path = glob.glob(scan_path)
-        self.sf = State_file
 
     def scan(self):
         res = []
         for file in self.scan_path:
+        
             file_extension = os.path.splitext(file)[-1].lower()
             file_path = os.path.realpath(file)
+
             if file_extension == ".csv":
-                csv = CSVFile(file,";")
-                res.append(csv)
+                separator = self._get_csv_separator(file)
+                csv_file = CSVFile(file, separator)
+                res.append(csv_file)
+        
             elif file_extension == ".xlsx":
                 xlsx = XLSXFile(file, file_path)
                 res.append(xlsx)
+        
             else:
                 raise Exception("file type is not supported: {file}")
         return res
+
+    def _get_csv_separator(self, file):
+        with open(file, "r", newline="") as csvfile:
+            first_line = csvfile.readline()
+            dialect = csv.Sniffer().sniff(first_line)
+            csvfile.close()
+        return dialect.delimiter

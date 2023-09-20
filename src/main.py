@@ -1,7 +1,7 @@
 import argparse
 
-from csvobj.file import File
-from csvobj.statefile import StateFile
+from files.file import File
+from files.statefile import StateFile
 
 from parser.parser import Parser, Scanner
 
@@ -27,7 +27,7 @@ if __name__ == "__main__":
     logger = setup_logger(args.log_path, INFO)
     sf = StateFile(args.state_path)
     parser = Parser(sf)
-    scanner = Scanner(sf, args.scan_path)
+    scanner = Scanner(args.scan_path)
     files: [File | None] = scanner.scan()
     for file in files:
         reader = parser.parse(file)
@@ -41,7 +41,6 @@ if __name__ == "__main__":
                                              connection=CONNECTION_STRING,
                                              if_exists="append")
                     batches = reader.next_batches(100)
-
                 logger.info(
                     f"Successfully wriiten {file.path} to {tablename}")
             except Exception as e:
