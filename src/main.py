@@ -9,7 +9,7 @@ from logger.log import setup_logger
 from logging import INFO
 
 
-CONNECTION_STRING = "mysql+pymysql://root:mamali75@localhost:3306/cdr"
+CONNECTION_STRING = "<>"
 
 
 if __name__ == "__main__":
