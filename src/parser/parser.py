@@ -1,11 +1,11 @@
 from abc import abstractmethod
 
 from logger.log import setup_logger
-from csvobj.statefile import StateFile
+from files.statefile import StateFile
 
-from csvobj.csv import CSVFile
-from csvobj.file import File
-from csvobj.xlsx import XLSXFile
+from files.csv import CSVFile
+from files.file import File
+from files.xlsx import XLSXFile
 
 import polars as pl
 import logging
@@ -16,12 +16,22 @@ logger = setup_logger("processor.log", logging.DEBUG)
 
 
 class AbastractParser:
+    __DATE_COLUMNS = ["Date","Day"]
+
     def __init__(self, sf: StateFile) -> None:
         self.sf = sf
     
     @abstractmethod
     def parse(self, file: File):
         pass
+
+    def _parse_dates(self, df: pl.DataFrame):
+        if self.__DATE_COLUMNS in df.columns:
+            date_col = df.columns[0]
+            df = df.with_columns(pl.col(date_col).str.strptime(pl.Date, format="%Y.%m.%d"))
+            return df
+
+
 class CSVParser(AbastractParser):
     def parse(self, csv: CSVFile):
         if not self.sf.check_file_is_parsed(csv):
@@ -34,7 +44,9 @@ class CSVParser(AbastractParser):
             except Exception as e:
                 raise (e)
 
+
 class XLSXParser(AbastractParser):
+    
     def parse(self, xlsx: XLSXFile):
         if not self.sf.check_file_is_parsed(xlsx):
             try:
@@ -57,7 +69,6 @@ class Parser(AbastractParser):
             return p.parse(file)
         else:
             raise Exception(f"could not parse filetype {file.file_type}")
-
 
 
 class Scanner:
