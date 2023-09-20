@@ -22,12 +22,14 @@ if __name__ == "__main__":
     parser.add_argument("--state-path", dest="state_path",
                         required=True, help="Path to the State file")
     parser.add_argument("--scan-path", dest="scan_path",
-                        required=True, help="Path to scan CSV files")
+                        required=True, help="Path to scan CSV files",
+                        default="./*")
+
     args = parser.parse_args()
     logger = setup_logger(args.log_path, INFO)
     sf = StateFile(args.state_path)
     parser = Parser(sf)
-    scanner = Scanner(args.scan_path if args.scan_path else "./*")
+    scanner = Scanner(args.scan_path)
     files: [File | None] = scanner.scan()
     for file in files:
         reader = parser.parse(file)
