@@ -18,11 +18,11 @@ logger = setup_logger("processor.log", logging.DEBUG)
 
 
 class AbastractParser:
-    _DATE_COLUMNS = ["Date","Day"]
+    _DATE_COLUMNS = ["Date", "Day"]
 
     def __init__(self, sf: StateFile) -> None:
         self.sf = sf
-    
+
     @abstractmethod
     def parse(self, file: File):
         pass
@@ -31,7 +31,9 @@ class AbastractParser:
         for date in self._DATE_COLUMNS:
             if date in df.columns:
                 date_col = df.columns[0]
-                df = df.with_columns(pl.col(date_col).str.strptime(pl.Date, format="%Y.%m.%d"))
+                df = df.with_columns(
+                    pl.col(date_col).str.strptime(pl.Date, format="%Y.%m.%d")
+                )
                 return df
         raise Exception("Could not parse dates")
 
@@ -50,7 +52,6 @@ class CSVParser(AbastractParser):
 
 
 class XLSXParser(AbastractParser):
-    
     def parse(self, xlsx: XLSXFile):
         if not self.sf.check_file_is_parsed(xlsx):
             try:
@@ -62,9 +63,9 @@ class XLSXParser(AbastractParser):
             except Exception as e:
                 raise (e)
 
-class Parser(AbastractParser):
 
-    def parse(self, file:File):
+class Parser(AbastractParser):
+    def parse(self, file: File):
         if file.file_type == "xlsx":
             p = XLSXParser(self.sf)
             return p.parse(file)
@@ -76,14 +77,12 @@ class Parser(AbastractParser):
 
 
 class Scanner:
-
     def __init__(self, scan_path) -> None:
         self.scan_path = glob.glob(scan_path)
 
     def scan(self):
         res = []
         for file in self.scan_path:
-        
             file_extension = os.path.splitext(file)[-1].lower()
             file_path = os.path.realpath(file)
 
@@ -91,11 +90,11 @@ class Scanner:
                 separator = self._get_csv_separator(file)
                 csv_file = CSVFile(file, separator)
                 res.append(csv_file)
-        
+
             elif file_extension == ".xlsx":
                 xlsx = XLSXFile(file, file_path)
                 res.append(xlsx)
-        
+
             else:
                 raise Exception("file type is not supported: {file}")
         return res

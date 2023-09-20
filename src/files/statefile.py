@@ -2,6 +2,7 @@ import json
 from .file import File
 from pathlib import Path
 
+
 class StateFile:
     def __init__(self, path) -> None:
         self.path = path
