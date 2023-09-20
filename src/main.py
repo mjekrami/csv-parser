@@ -27,7 +27,7 @@ if __name__ == "__main__":
     logger = setup_logger(args.log_path, INFO)
     sf = StateFile(args.state_path)
     parser = Parser(sf)
-    scanner = Scanner(args.scan_path)
+    scanner = Scanner(args.scan_path | "./*")
     files: [File | None] = scanner.scan()
     for file in files:
         reader = parser.parse(file)
